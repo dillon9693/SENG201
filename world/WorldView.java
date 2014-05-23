@@ -21,7 +21,7 @@ public class WorldView implements Observer{
 	private World w;
 	
 	/**
-	 * Make a very simple GUI. Refactor when time allows.  
+	 * Make a very simple GUI. Refactor when time allows. 
 	 */
 	private void buildGUI() {
 		jf = new JFrame("World Listener");
@@ -46,7 +46,8 @@ public class WorldView implements Observer{
 	 * Enables stand-alone use.  
 	 */
 	public static void main(String[] args) {
-		WorldView me = new WorldView();
+		World w = new World(true);
+		WorldView me = new WorldView(w);
 		// Take a copy of what has been happening.
 		// Note to self: could save this in a file...
 		System.out.println(me.jta.getText());

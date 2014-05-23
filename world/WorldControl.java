@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import java.util.Observable;
 import java.util.Observer;
 
+import javax.*;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -36,6 +37,7 @@ import actor.Person;
  */
 public class WorldControl implements Observer {
 	private World w;
+	private WorldView wv;
 	
 	private Person selectedPerson;
 	private Room selectedRoom;
@@ -54,7 +56,7 @@ public class WorldControl implements Observer {
 	private void buildGui() {
 		jp = new JPanel();
 		
-		jp.setLayout(new GridLayout(3,2));
+		jp.setLayout(new GridLayout(4,2));
 		jsp = new JScrollPane(jp);
 		
 		buildRooms();
@@ -129,6 +131,9 @@ public class WorldControl implements Observer {
 		
 	}
 	
+	/*
+	 * Builds world containing objects specified in demoWorld() method.
+	 */
 	private void buildWorld() {
 		w = new World();
 		w.demoWorld();
@@ -136,7 +141,7 @@ public class WorldControl implements Observer {
 		actorList.setListData(w.actors().toArray(new Person[0]));
 		w.addObserver(this);
 		// A separate view
-		WorldView wv = new WorldView(w);
+		wv = new WorldView(w);
 	}
 	
 	private void buildControls() {
@@ -149,7 +154,7 @@ public class WorldControl implements Observer {
 				Object o = roomList.getSelectedValue();
 				if (o instanceof Room) {
 					if(selectedPerson == null){
-						System.err.println("No actor selected");
+						JOptionPane.showMessageDialog(jf, "No actor selected");
 					} else {
 						selectedRoom = (Room)o;
 						System.out.println("moving " + selectedPerson.name() + " from " + 
@@ -157,7 +162,7 @@ public class WorldControl implements Observer {
 						selectedPerson.moveTo((Room) roomList.getSelectedValue());
 					}
 				} else {
-					System.err.println("Not a Room---you can't go there");
+					JOptionPane.showMessageDialog(jf, "Not a Room---you can't go there");
 				}
 			}
 		});
@@ -170,18 +175,21 @@ public class WorldControl implements Observer {
 		take.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				if(selectedRoom == null) {
-					System.err.println("Can't take: no Room selected");
+					JOptionPane.showMessageDialog(jf, "Can't take: no Room selected");
 					return;
 				} else if (selectedPerson == null)  {
-					System.err.println("Can't take: no Actor selected");
+					JOptionPane.showMessageDialog(jf, "Can't take: no Actor selected");
 					return;
 				} else if(selectedPerson.location() != selectedRoom) {
-					System.err.println("Must be in " + selectedRoom + " to take this");
+					JOptionPane.showMessageDialog(jf, "Must be in " + selectedRoom + " to take this");
 					return;
 				} else {	
 					selectedThing = (Thing)contents.getSelectedValue();
 					if(selectedThing != null) {
 						selectedPerson.take(selectedThing);
+					}
+					else {
+						JOptionPane.showMessageDialog(jf, "No item selected");
 					}
 				}
 			}
@@ -194,10 +202,10 @@ public class WorldControl implements Observer {
 		drop.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				if(selectedRoom == null) {
-					System.err.println("Can't drop: no Room selected");
+					JOptionPane.showMessageDialog(jf, "Can't drop: no Room selected");
 					return;
 				} else if (selectedPerson == null)  {
-					System.err.println("Can't drop: no Actor selected");
+					JOptionPane.showMessageDialog(jf, "Can't drop: no Actor selected");
 					return;
 				} 
 				if(selectedPerson.location() != selectedRoom) {
@@ -208,9 +216,15 @@ public class WorldControl implements Observer {
 				if(selectedThing != null) {
 					selectedPerson.drop(selectedThing);
 				}
+				else {
+					JOptionPane.showMessageDialog(jf, "No item selected");
+				}
 			}
 		});
 		
+		/*
+		 * Clears all selections in GUI Lists.
+		 */
 		JButton clear = new JButton("Clear");
 		clear.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent ae){
@@ -221,6 +235,9 @@ public class WorldControl implements Observer {
 			}
 		});
 		
+		/*
+		 * Quits the program.
+		 */
 		JButton quit = new JButton("Quit");
 		quit.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent ae) {
@@ -230,34 +247,69 @@ public class WorldControl implements Observer {
 			}
 		});
 		
+		/*
+		 * Button to add new Person to the world.
+		 */
 		JButton addPerson = new JButton("Add Person");
 		addPerson.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent ae) {
-				String name = JOptionPane.showInputDialog("Name:");
-				Person p = new Person(name);
-				w.addPerson(p);
-				//p.moveTo(w);
-			}
-		});
-		
-		JButton addRoom = new JButton("Add Room");
-		addRoom.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent ae) {
-				String label = JOptionPane.showInputDialog("Label:");
-				Room r = new Room(label);
-				w.addRoom(r);
+				String name = "";
+				while(name.length() == 0) {
+					name = JOptionPane.showInputDialog("Name:");
+					
+					if(name.length() != 0) {
+						Person p = new Person(name);
+						w.addPerson(p);
+						Room[] room = w.places().toArray(new Room[0]);
+						p.moveTo(room[0]);
+					}
+					else {
+						JOptionPane.showMessageDialog(jf, "Please enter a name.");
+					}
+				}
 			}
 		});
 		
 		/*
-		 * !!!!!INCOMPLETE!!!!
+		 * Button to add new Room to the World.
 		 */
-		JButton addThing = new JButton("Add Item");
+		JButton addRoom = new JButton("Add Room");
 		addRoom.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent ae) {
-				String name = JOptionPane.showInputDialog("Name:");
-				Thing t = new Thing(name);
-				w.addThing(t);
+				String label = "";
+				while(label.length() == 0) {
+					label = JOptionPane.showInputDialog("Label:");
+					if(label.length() != 0) {
+						Room r = new Room(label);
+						w.addRoom(r);
+					}
+					else {
+						JOptionPane.showMessageDialog(jf, "Please enter label.");
+					}
+				}
+			}
+		});
+		
+
+		/*
+		 * Button to add a new Item to the World
+		 */
+		JButton addThing = new JButton("Add Item");
+		addThing.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent ae) {
+				String name = "";
+				while(name.length() == 0) {
+					name = JOptionPane.showInputDialog("Name:");
+					if(name.length() != 0) {
+						Thing t = new Thing(name);
+						w.addThing(t);
+						Room[] room = w.places().toArray(new Room[0]);
+						room[0].add(t);
+					}
+					else {
+						JOptionPane.showMessageDialog(jf, "Please enter a name.");
+					}
+				}
 			}
 		});
 		
@@ -276,12 +328,12 @@ public class WorldControl implements Observer {
 		modButtons.add(addRoom);
 		modButtons.add(addThing);
 		
+		//buttons.add(modButtons);
 		jp.add(buttons);
 		jp.add(otherButtons);
 		jp.add(modButtons);
 		
 	}
-	
 	
 	
 	/**

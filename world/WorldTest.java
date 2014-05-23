@@ -22,7 +22,7 @@ public class WorldTest {
 	private Room bedroom;
 	@Before
 	public void setUp() throws Exception {
-		testWorld = new World(true);
+		testWorld = new World();
 		
 		bill = new Person("Bill");
 		john = new Person("John");
@@ -32,23 +32,82 @@ public class WorldTest {
 		bedroom = new Room("Bedroom", 2, "Sleep Here");
 	}
 
+	/*
+	 * Test if actors() returns the correct list of actors in the world.
+	 */
 	@Test
 	public void testActors() {
 		Collection<Person> testColl = new ArrayList<Person>();
 		testColl.add(bill);
 		testColl.add(john);
+		testWorld.addPerson(bill);
+		testWorld.addPerson(john);
 		
 		assertTrue(testColl.containsAll(testWorld.actors()));
 	}
 
+	/*
+	 * Test if items() returns the correct list of items in the world.
+	 */
 	@Test
 	public void testItems() {
-		fail("Not yet implemented");
+		Collection<Thing> testColl = new ArrayList<Thing>();
+		testColl.add(baseball);
+		testColl.add(broom);
+		testWorld.addThing(baseball);
+		testWorld.addThing(broom);
+		
+		assertTrue(testColl.containsAll(testWorld.items()));
 	}
 
+	/*
+	 * Test if places() returns the correct list of places in the world.
+	 */
 	@Test
 	public void testPlaces() {
-		fail("Not yet implemented");
+		Collection<Room> testColl = new ArrayList<Room>();
+		testColl.add(livingRoom);
+		testColl.add(bedroom);
+		testWorld.addRoom(livingRoom);
+		testWorld.addRoom(bedroom);
+		
+		assertTrue(testColl.containsAll(testWorld.places()));
+	}
+	
+	/*
+	 * Test if addPerson() successfully adds a new Person to the world.
+	 */
+	@Test
+	public void testAddPerson() {
+		Collection<Person> testColl = new ArrayList<Person>();
+		testColl.add(bill);
+		testWorld.addPerson(bill);
+		
+		assertTrue(testColl.containsAll(testWorld.actors()));
+	}
+	
+	/*
+	 * Test if addRoom() successfully adds a new Room to the world.
+	 */
+	@Test
+	public void testAddRoom() {
+		Collection<Room> testColl = new ArrayList<Room>();
+		testColl.add(livingRoom);
+		testWorld.addRoom(livingRoom);
+		
+		assertTrue(testColl.containsAll(testWorld.places()));
+	}
+	
+	/*
+	 * Test if addThing() successfully adds a new Thing to the world.
+	 */
+	@Test
+	public void testAddThing() {
+		Collection<Thing> testColl = new ArrayList<Thing>();
+		testColl.add(baseball);
+		testWorld.addThing(baseball);
+		
+		assertTrue(testColl.containsAll(testWorld.items()));
 	}
 
 }

@@ -74,6 +74,7 @@ public class World extends Observable implements Observer {
 	 */
 	public void addPerson(Person p) {
 		actors.add(p);
+		
 		p.addObserver(this);
 		setChanged();
 		notifyObservers(p);

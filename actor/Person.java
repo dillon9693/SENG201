@@ -33,6 +33,9 @@ public class Person extends Observable {
 	 * @return Removed item.
 	 */
 	public Thing drop(Thing t) {
+		if(inventory.size() == 0){
+			return null;
+		}
 		inventory.remove(t);
 		location.add(t);
 		update(t);
