@@ -11,11 +11,10 @@ import thing.Thing;
  * @author Dillon Kerr
  *
  */
-public class Person extends Observable {
+public class Person extends Actor {
 	
-	private Collection<Thing> inventory;
-	private Room location;
-	private String name;
+	private ArrayList<Thing> inventory;
+	private ArrayList<Room> history;
 	
 	/**
 	 * Constructor
@@ -23,79 +22,60 @@ public class Person extends Observable {
 	 */
 	public Person(String name) {
 		inventory = new ArrayList<Thing>();
-		location = null;
-		this.name = name;
+		super.setName(name);
+		history = new ArrayList<Room>();
 	}
 	
 	/**
 	 * Remove item from inventory of person and add to room inventory.
 	 * @param t - Thing to be removed.
-	 * @return Removed item.
+	 * @return - Removed item.
 	 */
 	public Thing drop(Thing t) {
 		if(inventory.size() == 0){
 			return null;
 		}
 		inventory.remove(t);
-		location.add(t);
+		super.location().add(t);
 		update(t);
 		return t;
 	}
 	
 	/**
 	 * Inventory of person suitable for iteration by clients.
-	 * @return Inventory
+	 * @return - Collection containing inventory
 	 */
 	public Collection<Thing> inventory() {
 		return inventory;
 	}
 	
 	/**
-	 * Tell others where we are.
-	 * @return Current location of person (room).
-	 */
-	public Room location() {
-		return location;
-	}
-	
-	/**
-	 * Set or change location of person
+	 * Set or change location of person and add to history
 	 * @param destination - Determines new location of person.
 	 */
-	public void moveTo(Room destination) {
-		location = destination;
-		update(destination);
-	}
 	
-	/**
-	 * Tell others our name.
-	 * @return Name of person.
-	 */
-	public String name() {
-		return name;
+	public void moveTo(Room destination) {
+		super.setLocation(destination);
+		history.add(destination);
+		super.update(destination);
 	}
 	
 	/**
 	 * Add an item to inventory of a person. Remove it from the room contents.
-	 * @param t
+	 * @param t - Item that will be taken
 	 */
 	public void take(Thing t) {
 		inventory.add(t);
-		location.remove(t);
-		update(t);
-	}
-	
-	private void update(Object o) {
-		setChanged();
-		notifyObservers(o);
+		super.location().remove(t);
+		super.update(t);
 	}
 	
 	/**
-	 * Person-specific version of toString().
+	 * Gets the history of the person.
+	 * @return - List of rooms that have been visited.
 	 */
-	@Override
-	public String toString() {
-		String s = "Name: "+name+", Location: "+location;
-		return s;
+	public ArrayList<Room> history() {
+		return history;
 	}
+	
 }

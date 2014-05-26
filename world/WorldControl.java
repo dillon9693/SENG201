@@ -1,385 +1,288 @@
 package world;
 
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.Observable;
-import java.util.Observer;
-
-import javax.*;
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.ListSelectionModel;
-import javax.swing.border.TitledBorder;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
+import javax.swing.JTextArea;
 
 import place.Room;
 import thing.Thing;
 import world.World;
+import actor.Actor;
+import actor.Creature;
 import actor.Person;
 
 /**
- * Prototype controller for Worlds.  Observes updates in World and
- * supports browsing of World. Supports some simple actions.
+ * Controller for Worlds.  Responds to updates in the view, such as a
+ * clicked button. Supports actions that manipulate the world and its
+ * objects. Static methods connect the controller to the view.
  * If a person and place are selected then move allows relocation.
  * A person can take or drop a thing from their current location.
  * 
- *  Needs facilities to allow creation and editing of worlds.
+ *  Allows user to add new elements to the world.
  *  
- * @author Neville
+ * @author Dillon Kerr
  *
  */
-public class WorldControl implements Observer {
-	private World w;
-	private WorldView wv;
+public class WorldControl {
 	
-	private Person selectedPerson;
-	private Room selectedRoom;
-	private Thing selectedThing;
-	
-	private JFrame jf = new JFrame("World Control");
-	
-	private JList roomList = new JList();
-	private JList actorList = new JList();
-	private JList stuff = new JList();
-	private JList contents = new JList();
-	
-	JScrollPane jsp;
-	JPanel jp;
-	
-	private void buildGui() {
-		jp = new JPanel();
-		
-		jp.setLayout(new GridLayout(4,2));
-		jsp = new JScrollPane(jp);
-		
-		buildRooms();
-		buildPeople();
-		buildContents();
-		buildStuff();
-		buildControls();
-		
-		jf.add(jsp);
-		jf.pack();
-		jf.setVisible(true);
-	}
-	
-	private void buildContents() {
-		JPanel jpc = new JPanel();
-		TitledBorder b = BorderFactory.createTitledBorder(BorderFactory.createRaisedBevelBorder(), "Room Contents");
-		jpc.setBorder(b);
-		if(selectedRoom != null) {
-			b.setTitle(b.getTitle() + "[" + selectedRoom.label());
-		}
-		jpc.add(contents);
-		
-		jp.add(jpc);
-	}
-	
-	private void buildStuff() {
-		JPanel jps = new JPanel();
-		jps.setBorder(BorderFactory.createTitledBorder(BorderFactory.createRaisedBevelBorder(), "Actor Inventory"));
-		jps.add(stuff);
-		jp.add(jps);
-		
-	}
-	
-	private void buildPeople(){
-		actorList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		actorList.addListSelectionListener(new ListSelectionListener(){
-			public void valueChanged(ListSelectionEvent lse) {
-				selectedPerson = (Person) actorList.getSelectedValue();
-				if(selectedPerson != null) {
-					stuff.setListData(selectedPerson.inventory().toArray(new Thing[0]));
-					roomList.setSelectedValue(selectedPerson.location(), true);
-				}
-			}
-		});
-		
-		JPanel jpp = new JPanel();
-		jpp.setBorder(BorderFactory.createTitledBorder(BorderFactory.createRaisedBevelBorder(), "Actors"));
+	private static JFrame jf = new JFrame("World Control");
 
-		jpp.add(actorList);
-		jp.add(jpp);
-	}
-	
-	private void buildRooms() {
-		roomList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-		roomList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		roomList.addListSelectionListener(new ListSelectionListener() {
-			public void valueChanged(ListSelectionEvent lse) {
-				Room r = (Room)roomList.getSelectedValue();
-				selectedRoom = r;
-				if(r != null) {
-					contents.setListData(r.contents().toArray(new Thing[0]));
-				}
-			}
-		});
-	
-		
-		JPanel jpr = new JPanel();
-		jpr.setBorder(BorderFactory.createTitledBorder(BorderFactory.createRaisedBevelBorder(), "Places"));
-
-		jpr.add(roomList);
-		jp.add(jpr);
-		
-	}
-	
-	/*
-	 * Builds world containing objects specified in demoWorld() method.
+	/**
+	 * Allows actor to move to selected room and
+	 * adds new room to actors' history.
+	 * @param o - room to be visited
+	 * @param p - person to be moved to room
 	 */
-	private void buildWorld() {
-		w = new World();
-		w.demoWorld();
-		roomList.setListData( w.places().toArray(new Room[0]));
-		actorList.setListData(w.actors().toArray(new Person[0]));
-		w.addObserver(this);
-		// A separate view
-		wv = new WorldView(w);
-	}
-	
-	private void buildControls() {
-		/*
-		 * Moves selected person to selected room.
-		 */
-		JButton go = new JButton("Go To");
-		go.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent ae) {
-				Object o = roomList.getSelectedValue();
-				if (o instanceof Room) {
-					if(selectedPerson == null){
-						JOptionPane.showMessageDialog(jf, "No actor selected");
-					} else {
-						selectedRoom = (Room)o;
-						System.out.println("moving " + selectedPerson.name() + " from " + 
-								selectedPerson.location() + " to " + ((Room)roomList.getSelectedValue()));
-						selectedPerson.moveTo((Room) roomList.getSelectedValue());
-					}
-				} else {
-					JOptionPane.showMessageDialog(jf, "Not a Room---you can't go there");
-				}
-			}
-		});
-		
-		/*
-		 * Selected person can take selected thing from selected room
-		 *
-		 */
-		JButton take = new JButton("Take");
-		take.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				if(selectedRoom == null) {
-					JOptionPane.showMessageDialog(jf, "Can't take: no Room selected");
-					return;
-				} else if (selectedPerson == null)  {
-					JOptionPane.showMessageDialog(jf, "Can't take: no Actor selected");
-					return;
-				} else if(selectedPerson.location() != selectedRoom) {
-					JOptionPane.showMessageDialog(jf, "Must be in " + selectedRoom + " to take this");
-					return;
-				} else {	
-					selectedThing = (Thing)contents.getSelectedValue();
-					if(selectedThing != null) {
-						selectedPerson.take(selectedThing);
-					}
-					else {
-						JOptionPane.showMessageDialog(jf, "No item selected");
-					}
-				}
-			}
-		});
-		
-		/*
-		 * Selected person can drop selected thing for inventory
-		 */
-		JButton drop = new JButton("Drop");
-		drop.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				if(selectedRoom == null) {
-					JOptionPane.showMessageDialog(jf, "Can't drop: no Room selected");
-					return;
-				} else if (selectedPerson == null)  {
-					JOptionPane.showMessageDialog(jf, "Can't drop: no Actor selected");
-					return;
-				} 
-				if(selectedPerson.location() != selectedRoom) {
-					// will drop it where we are, irrespective of list state
-					roomList.setSelectedValue(selectedRoom, true);
-				}	
-				selectedThing = (Thing)stuff.getSelectedValue();
-				if(selectedThing != null) {
-					selectedPerson.drop(selectedThing);
+	public static void goToRoom(Object o, Actor p) {
+		if (o instanceof Room) {
+			if(p == null){
+				//error if no actor selected
+				JOptionPane.showMessageDialog(jf, "No actor selected.");
+			} 
+			else {
+				Room selectedRoom = (Room)o;
+				if(selectedRoom == p.location()){
+					//error if actor is already in selected room
+					JOptionPane.showMessageDialog(jf, p.name() + " is already in " + selectedRoom+".");
 				}
 				else {
-					JOptionPane.showMessageDialog(jf, "No item selected");
+					System.out.println("moving " + p.name() + " from " + 
+							p.location() + " to " + (selectedRoom));
+					p.moveTo(selectedRoom);
 				}
 			}
-		});
+		} else {
+			//error if no room selected
+			JOptionPane.showMessageDialog(jf, "No Room selected.");
+		}
 		
-		/*
-		 * Clears all selections in GUI Lists.
-		 */
-		JButton clear = new JButton("Clear");
-		clear.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent ae){
-				actorList.clearSelection();
-				roomList.clearSelection();
-				contents.clearSelection();
-				stuff.clearSelection();
+	}
+	
+	/**
+	 * Allows actor to take item from selected room and
+	 * add it to its inventory
+	 * @param r - room where item is
+	 * @param p - person who is taking item
+	 * @param o - item to be taken
+	 */
+	public static void takeItem(Room r, Actor a, Object o) {
+		if(a == null){
+			//error if no actor selected
+			JOptionPane.showMessageDialog(jf, "Can't take: no Actor selected.");
+			return;
+		}
+		//check if the actor is not a person
+		if(!(a instanceof Person)){
+			JOptionPane.showMessageDialog(jf, "Only people can take items.");
+			return;
+		}
+		Person p = (Person)a;
+		if(r == null) {
+			//error if no room selected
+			JOptionPane.showMessageDialog(jf, "Can't take: no Room selected.");
+			return;
+		} 
+		else if(p.location() != r) {
+			//error if person is not in same room as item
+			JOptionPane.showMessageDialog(jf, "Must be in " + r + " to take this.");
+			return;
+		} else {	
+			Thing selectedThing = (Thing)o;
+			System.out.println(selectedThing);
+			if(selectedThing != null) {
+				p.take(selectedThing);
 			}
-		});
-		
-		/*
-		 * Quits the program.
-		 */
-		JButton quit = new JButton("Quit");
-		quit.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent ae) {
-				jf.setVisible(false);
-				jf.dispose();
-				System.exit(0);
+			else {
+				//error if no item selected
+				JOptionPane.showMessageDialog(jf, "No item selected.");
 			}
-		});
-		
-		/*
-		 * Button to add new Person to the world.
-		 */
-		JButton addPerson = new JButton("Add Person");
-		addPerson.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent ae) {
-				String name = "";
-				while(name.length() == 0) {
-					name = JOptionPane.showInputDialog("Name:");
-					
-					if(name.length() != 0) {
-						Person p = new Person(name);
-						w.addPerson(p);
+		}
+	}
+	
+	/**
+	 * Drops item in personss inventory into current room.
+	 * @param p - person with item
+	 * @param o - item to be dropped
+	 */
+	public static void dropItem(Actor a, Object o) {
+		if (a == null)  {
+			//error if no actor selected
+			JOptionPane.showMessageDialog(jf, "Can't drop: no Actor selected.");
+			return;
+		} 
+		if(!(a instanceof Person)){
+			JOptionPane.showMessageDialog(jf, "Only people can drop items.");
+			return;
+		}
+		Person p = (Person)a;
+		Thing selectedThing = (Thing)o;
+		if(selectedThing != null) {
+			p.drop(selectedThing);
+		}
+		else {
+			//error if no item selected
+			JOptionPane.showMessageDialog(jf, "No item selected.");
+		}
+	}
+	
+	/**
+	 * Adds a person to the world in a default room
+	 * @param w - world where the person is to be added
+	 */
+	public static void addPerson(World w) {
+		String name = "";
+		while(name.length() == 0) {
+			//get inputted name
+			name = JOptionPane.showInputDialog("Name:");
+			
+			if(name.length() != 0) {
+				Actor p = new Person(name);
+				//add person to world in default room (start room)
+				w.addActor(p);
+				Room[] room = w.places().toArray(new Room[0]);
+				p.moveTo(room[0]);
+			}
+			else {
+				//error if no name entered
+				JOptionPane.showMessageDialog(jf, "Please enter a name.");
+			}
+		}
+	}	
+	/**
+	 * Adds a creature to the world in a default room
+	 * @param w - world where the creature is to be added
+	 */
+	public static void addCreature(World w) {
+		String name = "";
+		String type = "";
+		while(name.length() == 0) {
+			//get inputted name
+			name = JOptionPane.showInputDialog("Name:");
+			
+			if(name.length() != 0) {
+				while(type.length() == 0){
+					type = JOptionPane.showInputDialog("Type:");
+					if(type.length() != 0) {
+						Actor c = new Creature(name, type);
+						//add person to world in default room (start room)
+						w.addActor(c);
 						Room[] room = w.places().toArray(new Room[0]);
-						p.moveTo(room[0]);
+						c.moveTo(room[0]);
 					}
 					else {
-						JOptionPane.showMessageDialog(jf, "Please enter a name.");
+						JOptionPane.showMessageDialog(jf, "Please enter a type.");
 					}
 				}
 			}
-		});
-		
-		/*
-		 * Button to add new Room to the World.
-		 */
-		JButton addRoom = new JButton("Add Room");
-		addRoom.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent ae) {
-				String label = "";
-				while(label.length() == 0) {
-					label = JOptionPane.showInputDialog("Label:");
-					if(label.length() != 0) {
-						Room r = new Room(label);
-						w.addRoom(r);
+			else {
+				//error if no name entered
+				JOptionPane.showMessageDialog(jf, "Please enter a name.");
+			}
+		}
+	}
+	
+	/**
+	 * Adds a room to the world
+	 * @param w - world where the item is to be added
+	 */
+	public static void addRoom(World w) {
+		String label = "";
+		int level = -10;
+		String desc = "";
+		while(label.length() == 0) {
+			//get inputted label
+			label = JOptionPane.showInputDialog("Label:");
+			if(label.length() != 0) {
+				while(level == -10) {
+					/*try to convert inputted string to integer
+					 * catch exception if invalid input (i.e. not an integer)
+					*/
+					try {
+						//get inputted level
+						level = Integer.parseInt(JOptionPane.showInputDialog("Level:"));
+						while(desc.length() == 0) {
+							//get inputted description
+							desc = JOptionPane.showInputDialog(jf, "Description:");
+							if(desc.length() != 0){
+								Room r = new Room(label,level,desc);
+								w.addRoom(r); //add room to world
+							}
+							else {
+								//error if invalid description
+								JOptionPane.showMessageDialog(jf, "Please enter a description.");
+							}
+						}
 					}
-					else {
-						JOptionPane.showMessageDialog(jf, "Please enter label.");
+					catch(NumberFormatException e){
+						//error if invalid level
+						JOptionPane.showMessageDialog(jf, "Please enter valid level");
 					}
 				}
 			}
-		});
+			else {
+				//error if invalid label
+				JOptionPane.showMessageDialog(jf, "Please enter label.");
+			}
+		}
+	}
+	
+	/**
+	 * Adds an item to the world
+	 * @param w - world where the item is to be added
+	 */
+	public static void addItem(World w) {
+		String name = "";
+		String desc = "";
 		
-
-		/*
-		 * Button to add a new Item to the World
-		 */
-		JButton addThing = new JButton("Add Item");
-		addThing.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent ae) {
-				String name = "";
-				while(name.length() == 0) {
-					name = JOptionPane.showInputDialog("Name:");
-					if(name.length() != 0) {
-						Thing t = new Thing(name);
+		while(name.length() == 0) {
+			//get inputted name
+			name = JOptionPane.showInputDialog("Name:");
+			if(name.length() != 0) {
+				while(desc.length() == 0) {
+					//get inputted description
+					desc = JOptionPane.showInputDialog("Description:");
+					if(desc.length() != 0) {
+						Thing t = new Thing(name, desc);
 						w.addThing(t);
+						//adds item to default room (start room)
 						Room[] room = w.places().toArray(new Room[0]);
 						room[0].add(t);
 					}
 					else {
-						JOptionPane.showMessageDialog(jf, "Please enter a name.");
+						//error if description is not entered
+						JOptionPane.showMessageDialog(jf, "Please enter a description.");
 					}
 				}
 			}
-		});
-		
-		JPanel buttons = new JPanel();
-		JPanel otherButtons = new JPanel();
-		JPanel modButtons = new JPanel();
-		
-		buttons.add(go);
-		buttons.add(take);
-		buttons.add(drop);
-		
-		otherButtons.add(clear);
-		otherButtons.add(quit);
-		
-		modButtons.add(addPerson);
-		modButtons.add(addRoom);
-		modButtons.add(addThing);
-		
-		//buttons.add(modButtons);
-		jp.add(buttons);
-		jp.add(otherButtons);
-		jp.add(modButtons);
-		
+			else {
+				//error if name is not entered
+				JOptionPane.showMessageDialog(jf, "Please enter a name.");
+			}
+		}
 	}
 	
-	
 	/**
-	 * Update actors list after possible room change. Do we really 
-	 * need this if everything else is working properly?
+	 * Shows past rooms visited by a person
+	 * @param p - a person
 	 */
-	private void refreshActors() {
-		actorList.setListData(w.actors().toArray(new Person[0]));
-		actorList.clearSelection();
-		stuff.clearSelection();
-		stuff.setListData(new Thing[0]);
-	}
-	/**
-	 * Update rooms list after possible room change.
-	 * Do we really need this if everything else is
-	 * working properly?
-	 */
-	private void refreshRooms() {
-		roomList.setListData(w.places().toArray(new Room[0]));
-		roomList.clearSelection();
-		contents.setListData(new Room[1]);
-	}
-
-	/**
-	 * Assemble a demo world (since we don't have world editing capability yet).
-	 * GUI includes separate WorldView viewer.
-	 */
-	public static void main(String[] args) {
-		WorldControl me = new WorldControl();
-		me.buildGui();
-		me.buildWorld();
-		
-	}
-
-	/**
-	 * Something in the world has changed.  Update GUI content accordingly.
-	 */
-	@Override
-	public void update(Observable arg0, Object arg1) {
-		// Something in the world changed
-		System.out.println("Arg0: " + arg0);
-		System.out.println("Arg1: " + arg1.toString());
-		
-		refreshActors();
-		refreshRooms();
-		
+	public static void getPersonHistory(Actor a) {
+		if(a == null){
+			JOptionPane.showMessageDialog(jf, "No Actor selected.");
+			return;
+		}
+		if(!(a instanceof Person)){
+			JOptionPane.showMessageDialog(jf, "Only people have history.");
+			return;
+		}
+		Person p = (Person)a;
+		JTextArea jt = new JTextArea();
+		JScrollPane jsp = new JScrollPane(jt);
+		for(int i = 0; i < p.history().size(); i++) {
+			int j = i + 1;
+			jt.append(j + ". " + p.history().get(i).toString() + "\n");
+		}
+		JOptionPane.showMessageDialog(jf, jsp, p.name() + "'s Room History", JOptionPane.PLAIN_MESSAGE);
 	}
 
 }

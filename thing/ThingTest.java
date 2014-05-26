@@ -5,6 +5,13 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Unit tests for the Thing class. Tests the individual methods of
+ * the Thing class
+ * 
+ * @author Dillon Kerr
+ *
+ */
 public class ThingTest {
 
 	private Thing testThing;

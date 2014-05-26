@@ -15,6 +15,7 @@ public class Thing extends Observable {
 	
 	/**
 	 * Constructor (1 argument)
+	 * @param name - Name of thing
 	 */
 	public Thing(String name) {
 		description = "";
@@ -40,11 +41,27 @@ public class Thing extends Observable {
 	}
 	
 	/**
+	 * Sets description of thing
+	 * @param description - New description
+	 */
+	public void setDescription(String description) {
+		this.description = description;
+	}
+	
+	/**
 	 * Gets name of thing.
 	 * @return Name of thing
 	 */
 	public String name() {
 		return name;
+	}
+	
+	/**
+	 * Sets the name of the thing.
+	 * @param name - New name
+	 */
+	public void setName(String name) {
+		this.name = name;
 	}
 	
 	/**

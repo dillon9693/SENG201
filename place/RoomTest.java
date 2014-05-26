@@ -9,6 +9,13 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Unit tests for the Room class. Tests the individual methods of
+ * the Room class
+ * 
+ * @author Dillon Kerr
+ *
+ */
 public class RoomTest {
 	
 	private Room testRoom;

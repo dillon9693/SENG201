@@ -1,19 +1,23 @@
 package world;
 import java.util.*;
 
+import actor.Actor;
 import actor.Person;
 import place.Room;
 import thing.Thing;
 
 /**
- * Class that models simple worlds which comprise of rooms persons, and things. 
- * Currently stores these and can deliver to clients.
- * @author Dillon Kerrtends Observable
+ * Class that models simple worlds which comprise of rooms, persons, and things. 
+ * Currently stores these and can deliver to clients. Provides capability to add
+ * new rooms, persons, and things to the world. Can be observed and can observe
+ * other classes. Observes the individual parts of the world (Person, Room, Thing)
+ * 
+ * @author Dillon Kerr
  *
  */
 public class World extends Observable implements Observer {
 	
-	private ArrayList<Person> actors;
+	private ArrayList<Actor> actors;
 	private ArrayList<Thing> items;
 	private ArrayList<Room> places;
 	
@@ -22,7 +26,7 @@ public class World extends Observable implements Observer {
 	 * unless more world-building methods are available.
 	 */
 	public World() {
-		actors = new ArrayList<Person>();
+		actors = new ArrayList<Actor>();
 		items = new ArrayList<Thing>();
 		places = new ArrayList<Room>();	
 	}
@@ -33,7 +37,7 @@ public class World extends Observable implements Observer {
 	 * @param makingDemo - Whether to build a demo world.
 	 */
 	public World(boolean makingDemo) {
-		actors = new ArrayList<Person>();
+		actors = new ArrayList<Actor>();
 		items = new ArrayList<Thing>();
 		places = new ArrayList<Room>();
 		if(makingDemo) {
@@ -46,7 +50,7 @@ public class World extends Observable implements Observer {
 	 * of an appropriate class.
 	 * @return Collection of actors.
 	 */
-	public Collection<Person> actors() {
+	public Collection<Actor> actors() {
 		return actors;
 	}
 	
@@ -72,7 +76,7 @@ public class World extends Observable implements Observer {
 	 * Adds a new Person to the world.
 	 * @param p - Person to be added
 	 */
-	public void addPerson(Person p) {
+	public void addActor(Actor p) {
 		actors.add(p);
 		
 		p.addObserver(this);
@@ -102,7 +106,9 @@ public class World extends Observable implements Observer {
 	}
 	
 	
-	
+	/**
+	 * Method that creates a demo world by adding actors, rooms and things.
+	 */
 	public void demoWorld() {
 		Room livingRoom = new Room("Living Room", 1, "Relax here");
 		Room bedroom = new Room("Bedroom", 2, "Sleep Here");
@@ -124,6 +130,8 @@ public class World extends Observable implements Observer {
 		items.add(baseball);
 		items.add(broom);
 		items.add(lamp);
+		livingRoom.add(baseball);
+		livingRoom.add(broom);
 		bill.take(baseball);
 		bill.take(broom);
 		livingRoom.add(lamp);
@@ -139,6 +147,9 @@ public class World extends Observable implements Observer {
 		}
 	}
 	
+	/**
+	 * Sends update to observer
+	 */
 	public void update(Observable arg0, Object arg1) {
 		System.out.println("Change with" + arg1.toString());
 		setChanged();

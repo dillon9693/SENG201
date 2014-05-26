@@ -10,6 +10,13 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Unit tests for the World class. Tests the individual methods of the
+ * World class.
+ * 
+ * @author Dillon Kerr
+ *
+ */
 public class WorldTest {
 	
 	private World testWorld;
@@ -40,8 +47,8 @@ public class WorldTest {
 		Collection<Person> testColl = new ArrayList<Person>();
 		testColl.add(bill);
 		testColl.add(john);
-		testWorld.addPerson(bill);
-		testWorld.addPerson(john);
+		testWorld.addActor(bill);
+		testWorld.addActor(john);
 		
 		assertTrue(testColl.containsAll(testWorld.actors()));
 	}
@@ -78,10 +85,10 @@ public class WorldTest {
 	 * Test if addPerson() successfully adds a new Person to the world.
 	 */
 	@Test
-	public void testAddPerson() {
+	public void testAddActor() {
 		Collection<Person> testColl = new ArrayList<Person>();
 		testColl.add(bill);
-		testWorld.addPerson(bill);
+		testWorld.addActor(bill);
 		
 		assertTrue(testColl.containsAll(testWorld.actors()));
 	}

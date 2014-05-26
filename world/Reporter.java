@@ -11,6 +11,7 @@ import javax.swing.JFileChooser;
 
 import place.Room;
 import thing.Thing;
+import actor.Actor;
 import actor.Person;
 
 /**
@@ -77,22 +78,25 @@ public class Reporter implements Reportable
 	private void reportActors() 
 	{
 		destination.println("Actors:");
-		Collection<Person> actors = world.actors();
+		Collection<Actor> actors = world.actors();
 	
-		for (Person p : actors) 
+		for (Actor p : actors) 
 		{
 			destination.println(p.name() + " is in " + p.location().label());
 			
 			// Since persons may be carrying items we also need to report items for each person (if person is carrying any items).
-			if (p.inventory().size() > 0) 
-			{
-				destination.println("Carrying:   ");
-			
-				for (Thing i : (ArrayList<Thing>) p.inventory()) 
+			if(p instanceof Person) {
+				Person per = (Person)p;
+				if (per.inventory().size() > 0) 
 				{
-					destination.println("   " + i.name() + " (" + i.description() + ")");
+					destination.println("Carrying:   ");
+				
+					for (Thing i : (ArrayList<Thing>) per.inventory()) 
+					{
+						destination.println("   " + i.name() + " (" + i.description() + ")");
+					}
+					destination.println();
 				}
-				destination.println();
 			}
 		}
 	}

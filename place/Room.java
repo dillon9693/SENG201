@@ -11,9 +11,8 @@ import thing.Thing;
  */
 public class Room extends Observable {
 	
-	private Collection<Thing> items;
-	private double depth;
-	private double width;
+	private ArrayList<Thing> items;
+	private double depth, width;
 	private String description;
 	private String label;
 	private int level;
@@ -24,8 +23,8 @@ public class Room extends Observable {
 	 */
 	public Room(String label) {
 		items = new ArrayList<Thing>();
-		depth = 1.0;
-		width = 1.0;
+		depth = 5.0;
+		width = 5.0;
 		description = "";
 		this.label = label;
 		level = 1;
@@ -38,8 +37,8 @@ public class Room extends Observable {
 	 */
 	public Room(String label, int level) {
 		items = new ArrayList<Thing>();
-		depth = 0.0;
-		width = 0.0;
+		depth = 5.0;
+		width = 5.0;
 		description = "";
 		this.label = label;
 		this.level = level;
@@ -53,11 +52,31 @@ public class Room extends Observable {
 	 */
 	public Room(String label, int level, String description) {
 		items = new ArrayList<Thing>();
-		depth = 0.0;
-		width = 0.0;
+		depth = 5.0;
+		width = 5.0;
 		this.description = description;
 		this.label = label;
 		this.level = level;
+	}
+	
+	/**
+	 * Contents of room.
+	 * @return - Collection containing contents of room.
+	 */
+	public Collection<Thing> contents() {
+		return items;
+	}
+	
+	/**
+	 * List content of room.
+	 * @return - String containing comma-delimited list of content item names.
+	 */
+	public String contentsList() {
+		String s = "";
+		for(Thing t : items) {
+			s += ("" + t.name() + ",");
+		}
+		return s;
 	}
 	
 	/**
@@ -79,56 +98,11 @@ public class Room extends Observable {
 	}
 	
 	/**
-	 * Contents of room.
-	 * @return Collection containing contents of room.
-	 */
-	public Collection<Thing> contents() {
-		return items;
-	}
-	
-	/**
-	 * List content of room.
-	 * @return String containing comma-delimited list of content item names.
-	 */
-	public String contentsList() {
-		String s = "";
-		for(Thing t : items) {
-			s += ("" + t.name() + ",");
-		}
-		return s;
-	}
-	
-	
-	/**
-	 * Get room depth in metres.
-	 * @return Depth of rectangular room.
-	 */
-	public double depth() {
-		return depth;
-	}
-	
-	/**
 	 * Get brief description of room.
-	 * @return Room description.
+	 * @return - Room description.
 	 */
 	public String description() {
 		return description;
-	}
-	
-	/**
-	 * Get label as it appears on the door of the room.
-	 * @return Room label.
-	 */
-	public String label() {
-		return label;
-	}
-	
-	/**
-	 * Get level the room is on.
-	 * @return Room level; can be negative, zero is ground floor.
-	 */
-	public int level() {
-		return level;
 	}
 	
 	/**
@@ -140,6 +114,14 @@ public class Room extends Observable {
 	}
 	
 	/**
+	 * Get label as it appears on the door of the room.
+	 * @return - Room label.
+	 */
+	public String label() {
+		return label;
+	}
+	
+	/**
 	 * Set the label of the room.
 	 * @param label - Label of room.
 	 */
@@ -148,11 +130,35 @@ public class Room extends Observable {
 	}
 	
 	/**
+	 * Get level the room is on.
+	 * @return - Room level; can be negative, zero is ground floor.
+	 */
+	public int level() {
+		return level;
+	}
+	
+	/**
 	 * Set level of room.
 	 * @param level - Level of room.
 	 */
 	public void setLevel(int level) {
 		this.level = level;
+	}
+	
+	/**
+	 * Get depth of the room.
+	 * @return - Depth of room
+	 */
+	public double depth() {
+		return depth;
+	}
+	
+	/**
+	 * Get width of room.
+	 * @return - Width of room
+	 */
+	public double width() {
+		return width;
 	}
 	
 	/**
@@ -166,25 +172,20 @@ public class Room extends Observable {
 	}
 	
 	/**
-	 * Formatted string giving state detail.
+	 * Sends update to observer
+	 * @param o - Object that is updated
 	 */
-	@Override
-	public String toString() {
-		String s = "[Room: number = "+label+", level = "+level+", "+description+"]";
-		return s;
-	}
-	
-	/**
-	 * Get room width in metres.
-	 * @return Width of rectangular room.
-	 */
-	public double width() {
-		return width;
-	}
-	
 	private void update(Object o) {
 		setChanged();
 		notifyObservers(o);
 	}
 	
+	/**
+	 * Room-specific version of toString()
+	 */
+	public String toString() {
+		String s = "[Room: number = "+label+", level = "+level+", "+description+"]";
+		return s;
+	}
 }
+

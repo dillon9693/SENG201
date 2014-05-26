@@ -9,6 +9,13 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Unit tests for the Person class. Tests the individual methods of
+ * the class.
+ * 
+ * @author Dillon Kerr
+ *
+ */
 public class PersonTest {
 
 	private Person testPerson1;
@@ -76,7 +83,17 @@ public class PersonTest {
 	}
 	
 	/*
-	 * Test if moveTo() returns person's correct location after being moved.
+	 * Test if method sets person's correct location.
+	 */
+	@Test
+	public void testSetLocation() {
+		testPerson1.setLocation(kitchen);
+		
+		assertSame(kitchen, testPerson1.location());
+	}
+	
+	/*
+	 * Test if moveTo() records person's correct location after being moved.
 	 */
 	@Test
 	public void testMoveTo() {
@@ -95,6 +112,15 @@ public class PersonTest {
 		assertSame("Dillon", testPerson1.name());
 	}
 	
+	/*
+	 * Test if method correctly sets persons' name.
+	 */
+	@Test
+	public void testSetName() {
+		testPerson1.setName("tony");
+		
+		assertSame("tony", testPerson1.name());
+	}
 	/*
 	 * Test if user's inventory contains correct items after taking certain item.
 	 */
